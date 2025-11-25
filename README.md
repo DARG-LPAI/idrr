@@ -18,3 +18,5 @@ uv pip install -e ../IDRR_data
 https://github.com/ZpWang-AI/IDRR_data
 
 https://github.com/hiyouga/LLaMA-Factory
+
+https://github.com/volcengine/verl
