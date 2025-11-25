@@ -24,7 +24,6 @@ def default_compute_score(
     sandbox_fusion_url=None,
     concurrent_semaphore=None,
     memory_limit_mb=None,
-    **kwargs,
 ):
     """Compute the score for a given solution based on the data source.
 
@@ -41,14 +40,18 @@ def default_compute_score(
     Raises:
         NotImplementedError: If the reward function is not implemented for the given data source.
     """
-    if data_source == "openai/gsm8k":
+    if data_source == 'pdtb':
+        from . import pdtb
+
+        res = pdtb.compute_score(solution_str, ground_truth)
+    elif data_source == "openai/gsm8k":
         from . import gsm8k
 
         res = gsm8k.compute_score(solution_str, ground_truth)
     elif data_source in ["lighteval/MATH", "DigitalLearningGmbH/MATH-lighteval", "HuggingFaceH4/MATH-500"]:
-        from . import math_reward
+        from . import math
 
-        res = math_reward.compute_score(solution_str, ground_truth)
+        res = math.compute_score(solution_str, ground_truth)
         # [Optional] Math-Verify Integration
         # For enhanced accuracy, consider utilizing Math-Verify (https://github.com/huggingface/Math-Verify).
         # Note: Math-Verify needs to be manually installed via pip: `pip install math-verify`.
@@ -56,7 +59,7 @@ def default_compute_score(
 
         # from . import math_verify
         # res = math_verify.compute_score(solution_str, ground_truth)
-    elif data_source in ["math_dapo", "math", "math_dapo_reasoning"] or data_source.startswith("aime"):
+    elif data_source == "math_dapo" or data_source.startswith("aime"):
         from . import math_dapo
 
         res = math_dapo.compute_score(solution_str, ground_truth)
