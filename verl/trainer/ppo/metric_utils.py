@@ -18,7 +18,9 @@ Metrics related to the PPO trainer.
 from collections import defaultdict
 from functools import partial
 from typing import Any, Callable
+from sklearn.metrics import f1_score
 
+import re
 import numpy as np
 import torch
 
@@ -443,4 +445,21 @@ def process_validation_metrics(
             for metric_name, prompt_vals in metric2prompt_vals.items():
                 data_src2var2metric2val[data_source][var_name][metric_name] = np.mean(prompt_vals)
 
+    # breakpoint()
+    if 'pdtb' in data_source and 'label' in infos_dict:
+        # 填加preds和labels用于计算F1
+        output_texts = infos_dict['output_texts']
+        preds = []
+
+        for output_text in output_texts:
+            matches = re.findall(r'boxed{(.*?)}', output_text)
+            if matches:
+                preds.append(matches[0])
+            else:
+                preds.append("extract_failed")
+        labels = infos_dict['label']
+
+        data_src2var2metric2val[data_source]['task_reward']['f1@1'] = f1_score(preds, labels, average='macro', zero_division=0)
+        data_src2var2metric2val[data_source]['task_reward']['acc@1'] = np.mean([p == l for p, l in zip(preds, labels)])
+        
     return data_src2var2metric2val
