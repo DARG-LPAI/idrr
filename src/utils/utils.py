@@ -2,6 +2,8 @@ import re
 import ast
 import json
 
+# from json_repair import repair_json
+
 from .mylogger import logger
 
 def read_file(path: str) -> list | dict:
@@ -38,7 +40,43 @@ def write_file(path: str, data: list | dict) -> None:
     else:
         print(f'File extension [{path}] not valid.')
         raise ValueError(f"File extension [{path.split('.')[-1]}] not valid.")
+
+def re_search(text, type):
+    '''
+    搜索text中符合type类型的内容,
+    如果text中存在多个符合type类型的内容，则返回最后一个
+    如果搜索不到，则抛出异常
+    '''
+    pattern = ''
+    flags = re.DOTALL  # 添加 DOTALL 标志，让 . 也匹配换行符
     
+    if type == 'json':
+        pattern = r'```json\s*(.*?)\s*```'
+    elif type == 'box':
+        pattern = r'boxed{(.*?)}'
+    elif type == 'xml':
+        pattern = r'```xml\s*(.*?)\s*```'
+
+    matches = re.findall(pattern, text, flags)
+    if not matches and type == 'json':
+        # 使用贪婪匹配来匹配完整的字典结构
+        pattern = r'\{.*\}'
+        matches = re.findall(pattern, text, flags)
+
+    if len(matches) > 1:
+        logger.warning(f"the number of matches is greater than 1:")
+        for i, match in enumerate(matches):
+            logger.debug(f"match{i}:\n{match}\n")
+    elif not matches:
+        logger.error(f"no matches found for {type} in text:\n{text}\n")
+        raise ValueError()
+        return text
+
+    structured_text = matches[-1]
+    # if type == 'json':
+    #     structured_text = repair_json(structured_text)
+    return structured_text
+
 def extract_json(response: str) -> dict:
     # First, try to find JSON within ```json ... ``` blocks
     # The (.*?) captures the content within the ```json ... ``` block.
