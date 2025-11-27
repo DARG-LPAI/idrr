@@ -1,4 +1,10 @@
 torch==2.6.0
+torchaudio==2.6.0
+torchvision==0.21.0
 flash_attn==2.7.3
-trl==0.24.0
+flash-infer-python==0.2.2
 swanlab
+trl==0.24.0
+vllm==0.8.5
+verl==0.5.0
+llamafactory==0.9.4.dev0
