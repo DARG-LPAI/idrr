@@ -4,7 +4,7 @@
 
 set -x
 
-export CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=3,5
 export PYTHONPATH=/data/whsun/idrr
 
 use_dynamic_bsz=True
@@ -13,17 +13,18 @@ infer_ppo_max_token_len=$((1024 * 8))
 
 sp_size=2
 gpu_nums=2
-CHECKPOINT_PATH=../pretrained_models/Qwen/Qwen3-0.6B
+# CHECKPOINT_PATH=../pretrained_models/Qwen/Qwen3-0.6B
+CHECKPOINT_PATH=expt/rl_cold_start/merged-qwen3-0.6B
 project_name='verl_grpo_pdtb'
-experiment_name='Qwen3-0.6B-GRPO'
+experiment_name='Qwen3-0.6B-SFT-E1-GRPO-weight'
 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
     algorithm.use_kl_in_reward=False \
     algorithm.kl_ctrl.kl_coef=0.001 \
     \
-    data.train_files=data/rl/verl/pdtb2/top/qwen3_train.parquet \
-    data.val_files=data/rl/verl/pdtb2/top/qwen3_test.parquet \
+    data.train_files=./data/rl/verl/pdtb2/top/sft_rl_train.parquet \
+    data.val_files=./data/rl/verl/pdtb2/top/sft_rl_test.parquet \
     data.train_batch_size=256 \
     data.max_prompt_length=1024 \
     data.max_response_length=2048 \
