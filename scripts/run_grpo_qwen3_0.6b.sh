@@ -15,8 +15,11 @@ sp_size=2
 gpu_nums=2
 CHECKPOINT_PATH=../pretrained_models/Qwen/Qwen3-0.6B
 project_name='verl_grpo_pdtb'
-experiment_name='Qwen3-0.6B-GRPO'
-
+experiment_name='Qwen3-0.6B-GRPO-weihted_reward'
+# TODO: 
+# 1. add yaml simplify script
+# 2. monitor answer diversity, weighted_reward, format_followed_ratio etc.
+# 3. try ppo, dpo
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
     algorithm.use_kl_in_reward=False \
