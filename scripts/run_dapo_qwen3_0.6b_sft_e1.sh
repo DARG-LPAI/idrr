@@ -2,10 +2,10 @@
 # set -euxo pipefail
 
 export PYTHONPATH=/data/whsun/idrr
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0,7
 
 # 显存占用相关
-MODEL_PATH=expt/rl_cold_start/qwen3-0.6B/epo1/merged-qwen3-0.6B
+MODEL_PATH=expt/rl_cold_start/qwen3-0.6B
 train_prompt_bsz=256
 train_prompt_mini_bsz=32
 
@@ -16,7 +16,7 @@ overlong_buffer_len=$((1024 * 2))
 overlong_penalty_factor=1.0
 
 sp_size=2
-n_gpus_per_node=1
+n_gpus_per_node=2
 gen_tp=1
 
 use_dynamic_bsz=True
