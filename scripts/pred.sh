@@ -1,21 +1,19 @@
 #!/bin/bash
 
 # 配置参数
-export CUDA_VISIBLE_DEVICES=4,5
+export CUDA_VISIBLE_DEVICES=0
+export WANDB_DISABLED=true
+export SWANLAB_MODE="disabled"
 DATASET_DIR="./data"
-WORK="baseline"
-WORK_PATH="${WORK}/qwen3/epo5/1"
-# DEV_DATASET="pdtb2_dev_${WORK}"
-# TEST_DATASET="pdtb2_test_${WORK}"
-DEV_DATASET="pdtb2_dev_baseline_qwen3"
-TEST_DATASET="pdtb2_test_baseline_qwen3"
-# MODEL_PATH="/data/sunwh/pretrained_models/Meta-Llama-3.1-8B-Instruct"
-# MODEL_PATH="/data/sunwh/pretrained_models/DeepSeek-R1-Distill-Llama-8B"
-MODEL_PATH="/data/sunwh/pretrained_models/Qwen3-8B"
+WORK="arg2def"
+WORK_PATH="${WORK}/pdtb2/llama3/epo5"
+DEV_DATASET="pdtb2_dev_${WORK}"
+TEST_DATASET="pdtb2_test_${WORK}"
+MODEL_PATH="/data/whsun/pretrained_models/Meta-Llama-3.1-8B-Instruct"
 CHECKPOINTS_DIR="./expt/${WORK_PATH}"
 OUTPUT_ROOT="./results/${WORK_PATH}"
 PER_DEVICE_TRAIN_BATCH_SIZE=1
-TEMPLATE="qwen3"
+TEMPLATE="llama3"
 
 # 创建输出目录结构
 mkdir -p "${OUTPUT_ROOT}/dev" "${OUTPUT_ROOT}/test"
