@@ -38,5 +38,13 @@
 			"query": "input",
 			"response": "output"
 		}
+	},
+	"pdtb2_dev_arg2def": {
+		"file_name": "/data/whsun/idrr/data/arg2def/pdtb2/aplaca/dev.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
 	}
 }
