@@ -33,6 +33,8 @@ SEC_LABEL_LIST = [
 def extract_label(pred):
     if '</think>' in pred:
         pred = pred.split('</think>')[-1]
+    elif 'Relation: ' in pred:
+        pred = pred.split('Relation: ')[-1].split('.')[0]
     for label in LABEL_LIST:
         if label in pred:
             return label
