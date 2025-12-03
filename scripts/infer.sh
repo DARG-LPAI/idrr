@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # 配置参数
+export WANDB_DISABLED=true
+export SWANLAB_MODE="disabled"
 export CUDA_VISIBLE_DEVICES=0
 DATASET_DIR="./data"
 WORK="arg2def"
@@ -11,7 +13,7 @@ MODEL_PATH="/data/whsun/pretrained_models/Meta-Llama-3.1-8B-Instruct"
 # MODEL_PATH="/data/whsun/pretrained_models/Qwen/Qwen3-0.6B"
 CHECKPOINTS_DIR="./expt/${WORK_PATH}"
 OUTPUT_ROOT="./results/${WORK_PATH}"
-CKPT_PATH="pdtb2/llama3/epo5"
+CKPT_PATH="pdtb2/llama3/epo5/checkpoint-3880"
 PER_DEVICE_TRAIN_BATCH_SIZE=1
 
 llamafactory-cli train \
