@@ -38,7 +38,7 @@ def extract_label(pred):
     for label in LABEL_LIST:
         if label in pred:
             return label
-    raise ValueError(f"Label {pred} not found in {LABEL_LIST}")
+    raise ValueError(f"Label {pred} not found in {LABEL_LIST}, pred: \n-----\n{pred}\n-------\n")
 
 def extract_answer(s):
     # matches = re.findall(r'<answer[^>]*>(.*?)<\/answer>', s, re.DOTALL)
