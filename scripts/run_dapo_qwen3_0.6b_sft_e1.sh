@@ -2,7 +2,7 @@
 # set -euxo pipefail
 
 export PYTHONPATH=/data/whsun/idrr
-export CUDA_VISIBLE_DEVICES=5,7
+export CUDA_VISIBLE_DEVICES=7
 
 # 显存占用相关
 MODEL_PATH=/data/whsun/idrr/expt/rl_cold_start/merged-qwen3-0.6B
@@ -15,8 +15,8 @@ enable_overlong_buffer=True
 overlong_buffer_len=$((1024 * 2))
 overlong_penalty_factor=1.0
 
-sp_size=2
-n_gpus_per_node=2
+sp_size=1
+n_gpus_per_node=1
 gen_tp=1
 
 use_dynamic_bsz=True
@@ -55,8 +55,9 @@ n_resp_per_prompt=16
 
 
 # 命名相关
-project_name='verl_dapo_pdtb'
+project_name='verl_pdtb'
 exp_name='Qwen3-0.6B-E1-DAPO'
+CKPTS_DIR=${CKPTS_DIR:-"checkpoints/${project_name}/${exp_name}"}
 
 
 python3 -m recipe.dapo.main_dapo \
@@ -130,5 +131,5 @@ python3 -m recipe.dapo.main_dapo \
     trainer.test_freq=1 \
     trainer.save_freq=10 \
     trainer.total_epochs=3 \
-    trainer.default_local_dir="Qwen3-0.6B-E1-DAPO" \
+    trainer.default_local_dir="${CKPTS_DIR}" \
     trainer.resume_mode=auto $@ 2>&1 | tee dapo_log.log
