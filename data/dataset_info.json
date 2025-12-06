@@ -1,6 +1,6 @@
 {
     "pdtb2_train_rl_cold_start": {
-		"file_name": "/data/whsun/idrr/data/rl_cold_start/pdtb2_top_train.json",
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca_train.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
@@ -8,7 +8,7 @@
 		}
 	},
 	"pdtb2_dev_rl_cold_start": {
-		"file_name": "/data/whsun/idrr/data/rl_cold_start/pdtb2_top_dev.json",
+		"file_name": "rl_cold_start/pdtb2_top_dev.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
@@ -16,7 +16,7 @@
 		}
 	},
 	"pdtb2_test_rl_cold_start": {
-		"file_name": "/data/whsun/idrr/data/rl_cold_start/pdtb2_top_test.json",
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca_test.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
@@ -24,7 +24,7 @@
 		}
 	},
 	"pdtb2_train_arg2def": {
-		"file_name": "/data/whsun/idrr/data/arg2def/pdtb2/aplaca/train.json",
+		"file_name": "arg2def/pdtb2/aplaca/train.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
@@ -32,7 +32,7 @@
 		}
 	},
 	"pdtb2_test_arg2def": {
-		"file_name": "/data/whsun/idrr/data/arg2def/pdtb2/aplaca/test.json",
+		"file_name": "arg2def/pdtb2/aplaca/test.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
@@ -40,7 +40,7 @@
 		}
 	},
 	"pdtb2_dev_arg2def": {
-		"file_name": "/data/whsun/idrr/data/arg2def/pdtb2/aplaca/dev.json",
+		"file_name": "arg2def/pdtb2/aplaca/dev.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
