@@ -8,7 +8,7 @@
 		}
 	},
 	"pdtb2_dev_rl_cold_start": {
-		"file_name": "rl_cold_start/pdtb2_top_dev.json",
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca/dev.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
@@ -16,7 +16,7 @@
 		}
 	},
 	"pdtb2_test_rl_cold_start": {
-		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca_test.json",
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca/test.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
