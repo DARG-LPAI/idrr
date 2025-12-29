@@ -46,5 +46,21 @@
 			"query": "input",
 			"response": "output"
 		}
+	},
+	"pdtb2_train_qwen3_max_exp": {
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca/qwen3_max_exp_filted_train.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
+	},
+	"pdtb2_test_qwen3_max_exp": {
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca/qwen3_max_exp_filted_test.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
 	}
 }
