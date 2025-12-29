@@ -1,7 +1,7 @@
 ### model
-model_name_or_path: ../pretrained_models/Meta-Llama-3.1-8B-Instruct
+# model_name_or_path: ../pretrained_models/Meta-Llama-3.1-8B-Instruct
 # model_name_or_path: ../pretrained_models/DeepSeek-R1-Distill-Llama-8B
-# model_name_or_path: ../pretrained_models/Qwen/Qwen3-0.6B
+model_name_or_path: ../pretrained_models/Qwen/Qwen3-1.7B
 ### method
 stage: sft
 do_train: true
@@ -13,34 +13,32 @@ lora_dropout: 0.05
 seed: 42
 
 ### dataset
-dataset: pdtb2_train_arg2def
-template: llama3
+dataset: pdtb2_train_qwen3_max_exp
+template: qwen3
 cutoff_len: 2048
 # max_samples: 25
 overwrite_cache: true
 preprocessing_num_workers: 16
 
 ### output
-output_dir: expt/arg2def/pdtb2/llama3/epo5
+output_dir: expt/rl_cold_start/pdtb2/qwen3-1.7b-exp_by_qwen3/epo1
 logging_steps: 0.01
-save_steps: 0.25
+save_steps: 0.5
 plot_loss: true
 overwrite_output_dir: true
 
 ### train
-per_device_train_batch_size: 1
-gradient_accumulation_steps: 8
+per_device_train_batch_size: 8
+gradient_accumulation_steps: 1
 learning_rate: 5.0e-5
-num_train_epochs: 5
+num_train_epochs: 1
 lr_scheduler_type: cosine
 warmup_ratio: 0.1
 bf16: true
 use_rslora: true
 # fp16: true
 ddp_timeout: 180000000
-report_to: swanlab
-swanlab_project: idrr_sft
-swanlab_run_name: pdtb2_arg2def_llama3_epo5
+report_to: tensorboard
 
 ### eval
 # val_size: 0.1
