@@ -1,6 +1,6 @@
 {
     "pdtb2_train_rl_cold_start": {
-		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca_train.json",
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca/train.json",
 		"columns": {
 			"prompt": "instruction",
 			"query": "input",
