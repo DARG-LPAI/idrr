@@ -14,11 +14,11 @@ export HYDRA_FULL_ERROR=1
 export CUDA_VISIBLE_DEVICES=0,1
 
 # 显存相关
-MODEL_PATH=expt/rl_cold_start/pdtb2/top/qwen3-8b-exp_by_qwen3/epo1/lora_merged
-train_prompt_bsz=32 # 算法指标
-train_prompt_mini_bsz=8 # 算法指标
+MODEL_PATH=expt/rl_cold_start/pdtb2/top/qwen3-8b-distill_by_exp_dapo/epo1/lora_merged
+train_prompt_bsz=64 # 算法指标
+train_prompt_mini_bsz=64 # 算法指标
 vllm_memory_utilization=0.5
-n_resp_per_prompt=16
+n_resp_per_prompt=16 
 
 max_prompt_length=512
 max_response_length=256
@@ -33,8 +33,8 @@ gen_tp=2
 
 # TODO: 如何调整actor_ppo_max_token_len、infer_ppo_max_token_len和actor_rollout_ref.rollout.max_num_batched_tokens 才能最大化vLLM显存利用率
 use_dynamic_bsz=True
-actor_ppo_max_token_len=$((max_seq_len * 2)) # >= 2*max_seq_len
-infer_ppo_max_token_len=$((max_seq_len * 4)) # >= 2*max_seq_len
+actor_ppo_max_token_len=$((max_seq_len * 8)) # >= 2*max_seq_len
+infer_ppo_max_token_len=$((max_seq_len * 10)) # >= 2*max_seq_len
 offload=True
 
 
@@ -65,7 +65,7 @@ gen_prompt_bsz=$((train_prompt_bsz * 4))
 
 NOW=$(date +%Y%m%d_%H%M)
 project_name='verl_pdtb'
-exp_name='Qwen3-8B-E1_by_qwen3_max-DAPO-lora'
+exp_name='Qwen3-8B-Distill-Exp_Dapo-DAPO-lora'
 log_name="${exp_name}-${NOW}.log"
 CKPTS_DIR=${CKPTS_DIR:-"checkpoints/${project_name}/${exp_name}"}
 
@@ -106,7 +106,7 @@ python3 -m recipe.dapo.main_dapo \
     actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu=${infer_ppo_max_token_len} \
     actor_rollout_ref.rollout.tensor_model_parallel_size=${gen_tp} \
     actor_rollout_ref.rollout.enable_chunked_prefill=True \
-    actor_rollout_ref.rollout.max_num_batched_tokens=$((max_seq_len * 16)) \
+    actor_rollout_ref.rollout.max_num_batched_tokens=$((1024 * 16)) \
     actor_rollout_ref.rollout.temperature=${temperature} \
     actor_rollout_ref.rollout.top_p=${top_p} \
     actor_rollout_ref.rollout.top_k="${top_k}" \
@@ -157,9 +157,9 @@ python3 -m recipe.dapo.main_dapo \
     trainer.experiment_name="${exp_name}" \
     trainer.n_gpus_per_node=${n_gpus_per_node} \
     trainer.val_before_train=False \
-    trainer.test_freq=2 \
-    trainer.save_freq=10 \
+    trainer.test_freq=1 \
+    trainer.save_freq=5 \
     trainer.max_actor_ckpt_to_keep=2 \
-    trainer.total_epochs=5 \
+    trainer.total_epochs=3 \
     trainer.default_local_dir="${CKPTS_DIR}" \
     trainer.resume_mode=auto $@ 2>&1 | tee dapo_${NOW}.log
