@@ -55,12 +55,6 @@ def build_alpaca_prompts_labels(
         )
         prompts.append(prompt_text)
         labels.append(extract_prediction_from_text(output_) if output_ else None)
-        # metas.append({
-        #     "idx": i,
-        #     "instruction": instruction,
-        #     "input": input_,
-        #     "output": output_
-        # })
     return prompts, labels
 
 # -------------------------------
@@ -71,7 +65,7 @@ def build_prompts(data_format, data_path, ckpt_path):
     labels = []
     if data_format == 'verl':  # List[dict_keys(['data_source', 'prompt', 'reward_model'])]
         for item in read_parquet(data_path):
-            prompts.append(item['prompt'])
+            prompts.append(item['prompt'][0]['content'])
             labels.append(item['reward_model']['ground_truth'])
     elif data_format == 'alpaca':  # 与旧接口兼容（返回 labels=None）
         prompts, metas = build_alpaca_prompts_labels(data_path, ckpt_path)
@@ -92,38 +86,37 @@ def extract_prediction_from_text(text: str) -> Optional[str]:
 def generate_with_vllm(
     model_path: str,
     prompts: List[str],
-    do_sample: bool = True,
     temperature: float = 0.6,
-    top_k: int = 50,
     top_p: float = 0.95,
-    gpu_memory_utilization: float = 0.71,
+    top_k: int = 20,
+    gpu_memory_utilization: float = 0.75,
     max_tokens: int = 1024,
-    max_model_len: int = 2047
+    max_model_len: int = 4096,
+    max_num_seqs: int = 128,
     ) -> List[Dict[str, Any]]:
     sampling_params = SamplingParams(
         temperature=temperature,
         top_p=top_p,
         top_k=top_k,
-        # do_sample=do_sample,
         max_tokens=max_tokens,
     )
+    results: List[Dict[str, Any]] = []
     llm = LLM(
         model=model_path,
         gpu_memory_utilization=gpu_memory_utilization,
         max_model_len=max_model_len,
+        max_num_seqs=max_num_seqs,
         # dtype="half",
         # enforce_eager=True
-        )
+    )
     outputs = llm.generate(
         prompts,
         sampling_params=sampling_params,
-        )
-
-    results: List[Dict[str, Any]] = []
-    for i, output in enumerate(outputs):
+    )
+    for j, output in enumerate(outputs):
         text = output.outputs[0].text if output.outputs else ""
         results.append({
-            "idx": i,
+            "idx": j,
             "prompt": output.prompt,
             "output_text": text
         })
@@ -150,7 +143,6 @@ if __name__ == "__main__":
     # New inference parameters
     parser.add_argument("--cutoff_len", type=int, default=1024, help="Maximum context length (used as max_model_len).")
     parser.add_argument("--max_new_tokens", type=int, default=2048, help="Maximum new tokens to generate.")
-    parser.add_argument("--use_generate_config", action="store_true", default=True, help="Use generation_config.json when present; CLI overrides.")
     parser.add_argument("--temperature", type=float, default=0.6)
     parser.add_argument("--top_p", type=float, default=0.95)
     parser.add_argument("--top_k", type=int, default=50)
@@ -159,39 +151,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Merge generation config from ckpt if enabled
-    gen_cfg: Dict[str, Any] = {}
-    if args.use_generate_config and args.ckpt:
-        # Try to locate generation_config.json under ckpt path
-        ckpt_dir = Path(args.ckpt)
-        cand_paths = [
-            ckpt_dir / "generation_config.json",
-        ]
-        # Also check common nested path pattern
-        cand_paths += list(ckpt_dir.glob("**/generation_config.json"))
-        gen_path = next((p for p in cand_paths if p.exists()), None)
-        if gen_path:
-            try:
-                with open(gen_path, "r", encoding="utf-8") as f:
-                    gen_cfg = json.load(f)
-            except Exception as e:
-                print(f"Warning: failed to read generation_config.json: {e}")
-
-    # Helper to prefer CLI over config
-    def cfg_or_cli(name: str, cli_value: Any, default: Any) -> Any:
-        # If the CLI value differs from its parser default, keep CLI; else use config value if available
-        # We don't have parser defaults here, so we consider provided cli_value and fall back to config or default
-        return gen_cfg.get(name, cli_value if cli_value is not None else default)
-
-    # Resolve sampling args
-    do_sample = gen_cfg.get("do_sample", True)
-    temperature = cfg_or_cli("temperature", args.temperature, 0.6)
-    top_k = cfg_or_cli("top_k", args.top_k, 50)
-    top_p = cfg_or_cli("top_p", args.top_p, 0.95)
+    # 直接使用命令行参数
     max_model_len = args.cutoff_len + args.max_new_tokens
 
     if args.data_format == "alpaca":
-            
         prompts, labels = build_alpaca_prompts_labels(
             data_path=args.data_path,
             ckpt_path=args.ckpt,
@@ -209,10 +172,9 @@ if __name__ == "__main__":
             results = generate_with_vllm(
                 model_path=args.ckpt,
                 prompts=prompts,
-                do_sample=do_sample,
-                temperature=temperature,
-                top_k=top_k,
-                top_p=top_p,
+                temperature=args.temperature,
+                top_k=args.top_k,
+                top_p=args.top_p,
                 max_tokens=args.max_new_tokens,
                 max_model_len=max_model_len,
                 gpu_memory_utilization=args.gpu_memory_utilization
@@ -220,11 +182,9 @@ if __name__ == "__main__":
             # 合并 meta 与抽取到的 pred
             data_dict = {}
             for i, r in enumerate(results):
-                pred = extract_prediction_from_text(r["output_text"])
                 data_dict[str(i+1)] = {
                     "prompt": r["prompt"],
                     "output_text": r["output_text"],
-                    "pred": pred,
                 }
             write_file(data=data_dict, path=out_path)
             print(f"Saved {len(data_dict)} predictions to: {out_path}")
@@ -234,22 +194,18 @@ if __name__ == "__main__":
         results = generate_with_vllm(
             model_path=args.ckpt,
             prompts=prompts,
-            do_sample=do_sample,
-            temperature=temperature,
-            top_k=top_k,
-            top_p=top_p,
+            temperature=args.temperature,
+            top_k=args.top_k,
+            top_p=args.top_p,
             max_tokens=args.max_new_tokens,
             max_model_len=max_model_len,
-            # max_tokens=args.max_tokens
         )
         rows = []
         for i, r in enumerate(results):
-            pred = extract_prediction_from_text(r["output_text"])
             rows.append({
                 "idx": i,
                 "prompt": r["prompt"],
                 "output_text": r["output_text"],
-                "pred": pred,
                 "meta": {"label": labels[i] if labels and i < len(labels) else None}
             })
         out_path = args.out or default_out_path(args.data_path, args.ckpt)
