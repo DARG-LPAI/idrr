@@ -70,5 +70,13 @@
 			"query": "input",
 			"response": "output"
 		}
+	},
+	"pdtb2_train_qwen3_8b_dapo_lora_distll": {
+		"file_name": "sft/rl_cold_start/pdtb2/top/alpaca/qwen3_8b_dapo_lora_train.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
 	}
 }
