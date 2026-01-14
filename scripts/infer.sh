@@ -1,20 +1,20 @@
 #!/bin/bash
 
 # 配置参数
+export CUDA_VISIBLE_DEVICES=4,5
 export WANDB_DISABLED=true
 export SWANLAB_MODE="disabled"
-export CUDA_VISIBLE_DEVICES=0
+
 DATASET_DIR="./data"
-WORK="arg2def"
-WORK_PATH="${WORK}"
+WORK="baseline"
+WORK_PATH="pdtb2/top/temporal_aug/llama3-8b/epo5"
 DEV_DATASET="pdtb2_dev_${WORK}"
 TEST_DATASET="pdtb2_test_${WORK}"
-MODEL_PATH="/data/whsun/pretrained_models/Meta-Llama-3.1-8B-Instruct"
-# MODEL_PATH="/data/whsun/pretrained_models/Qwen/Qwen3-0.6B"
+MODEL_PATH="/data/sunwh/pretrained_models/Meta-Llama-3.1-8B-Instruct"
 CHECKPOINTS_DIR="./expt/${WORK_PATH}"
 OUTPUT_ROOT="./results/${WORK_PATH}"
-CKPT_PATH="pdtb2/llama3/epo5/checkpoint-3880"
-PER_DEVICE_TRAIN_BATCH_SIZE=1
+CKPT_PATH=""
+PER_DEVICE_TRAIN_BATCH_SIZE=4
 
 llamafactory-cli train \
     --stage sft \
@@ -31,13 +31,7 @@ llamafactory-cli train \
     --cutoff_len 1024 \
     --preprocessing_num_workers 16 \
     --per_device_eval_batch_size "${PER_DEVICE_TRAIN_BATCH_SIZE}" \
-    --predict_with_generate
+    --predict_with_generate \
+    --fp16
 
-# python /data/whsun/LLaMA-Factory/scripts/vllm_infer.py \
-#     --model_name_or_path /data/whsun/pretrained_models/Meta-Llama-3.1-8B-Instruct \
-#     --adapter_name_or_path expt/arg2def/pdtb2/llama3/epo5 \
-#     --template llama3 \
-#     --dataset pdtb2_test_arg2_def \
-#     # --enable_thinking 
-#     # --vllm_config {"enforce_eager":True} \
-#     # --dataset_dir ./data \
+python src/eval.py --data_path "${OUTPUT_ROOT}/${CKPT_PATH}/generated_predictions.jsonl"
