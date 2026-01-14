@@ -70,5 +70,45 @@
 			"query": "input",
 			"response": "output"
 		}
+	},
+	"pdtb2_train_temporal_aug_bs": {
+		"file_name": "sft/temporal_aug/pdtb2/top/bs_train.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
+	},
+	"pdtb2_train_temporal_aug": {
+		"file_name": "sft/temporal_aug/pdtb2/top/train.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
+	},
+	"pdtb2_test_baseline": {
+		"file_name": "sft/baseline/pdtb2_test.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
+	},
+	"pdtb2_dev_baseline": {
+		"file_name": "sft/baseline/pdtb2_dev.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
+	},
+	"pdtb2_train_baseline": {
+		"file_name": "sft/baseline/pdtb2_train.json",
+		"columns": {
+			"prompt": "instruction",
+			"query": "input",
+			"response": "output"
+		}
 	}
 }
