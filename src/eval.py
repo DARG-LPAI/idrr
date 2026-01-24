@@ -5,7 +5,7 @@ import argparse
 
 from pathlib import Path as path
 from collections import defaultdict
-from sklearn.metrics import precision_recall_fscore_support, classification_report
+from sklearn.metrics import precision_recall_fscore_support, classification_report, confusion_matrix
 
 from utils.mylogger import logger
 from utils.utils import read_file, write_file, re_search
@@ -30,17 +30,18 @@ SEC_LABEL_LIST = [
     'Synchrony'
 ]
 
-def extract_label(pred, type='box'):
+def extract_label(pred, extract_type='normal'):
     if '</think>' in pred:
         pred = pred.split('</think>')[-1]
     if 'Relation: ' in pred:
         pred = pred.split('Relation: ')[-1].split('.')[0]
+    elif extract_type == 'normal':
+        for label in LABEL_LIST:
+            if label in pred:
+                return label
     else:
-        pred = re_search(pred, type)
-    # for label in LABEL_LIST:
-    #     if label in pred:
-    #         return label
-    return pred.strip()
+        pred = re_search(pred, extract_type)
+        return pred.strip()
     raise ValueError(f"Prediction: ***{pred}*** not found in {LABEL_LIST}, pred: \n-----\n{pred}\n-------\n")
 
 def extract_answer(s):
@@ -98,6 +99,8 @@ def eval(gen_preds, data_path):
     acc_test = [pred == label for pred, label in zip(preds, labels)].count(True) / len(labels)
     assert acc == acc_test
     write_file(path(data_path) / 'eval_results.json', {'F1': f1_score,  'Accuracy': acc})
+    logger.info("\n*** 混淆矩阵 ***")
+    print(confusion_matrix(labels, preds))
     # 打印结果
     logger.info("\n***分类报告 (Classification Report)***")
     print(f"F1分数 (F1 Score):{f1_score}")
