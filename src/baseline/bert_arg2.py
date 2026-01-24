@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = '4,5'
+os.environ["CUDA_VISIBLE_DEVICES"] = '7'
 
 from IDRR_data import *
 import numpy as np
@@ -16,7 +16,7 @@ from typing import Dict, Optional
 # 获取当前文件所在的目录和根目录
 SRC_DIR = path(__file__).parent
 ROOT_DIR = SRC_DIR.parent
-OUTPUT_DIR = 'output_arg2'
+OUTPUT_DIR = 'output_args'
 
 # === dataset ===
 class CustomDataset(Dataset):
@@ -30,7 +30,7 @@ class CustomDataset(Dataset):
     def __getitem__(self, index):
         row = self.df.iloc[index]
         model_inputs = self.tokenizer(
-            row['arg2'],
+            row['arg1'], row['arg2'],
             add_special_tokens=True, 
             padding=True,
             truncation='longest_first', 
@@ -133,6 +133,7 @@ def save_evaluation_results(
         # 构建结果字典
         result_dict = {
             'sample_idx': idx,
+            'arg1': row.get('arg1', ''),
             'arg2': row.get('arg2', ''),
             'true_label_id': int(true_label_id),
             'true_label': true_label,
@@ -147,9 +148,9 @@ def save_evaluation_results(
             result_dict[f'prob_{label}'] = float(pred_probs[idx, label_idx])
         
         # 保留原始数据的其他列（如果有）
-        for col in dataset.df.columns:
-            if col not in result_dict:
-                result_dict[col] = row[col]
+        # for col in dataset.df.columns:
+        #     if col not in result_dict:
+        #         result_dict[col] = row[col]
         
         results.append(result_dict)
     
@@ -180,12 +181,12 @@ class CustomCallback(TrainerCallback):
         if log_filepath:
             self.log_filepath = log_filepath
         else:
-            self.log_filepath = ROOT_DIR / 'output_dir' / 'log.jsonl'
+            self.log_filepath = ROOT_DIR / OUTPUT_DIR / 'log.jsonl'
         
         self.eval_dataset = eval_dataset
         self.label_list = label_list
         self.save_eval_results = save_eval_results
-        self.output_dir = ROOT_DIR / 'output_dir' / 'eval_results'
+        self.output_dir = ROOT_DIR / OUTPUT_DIR / 'eval_results'
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.trainer = None  # 将在on_train_begin中设置
     
@@ -230,7 +231,7 @@ def main():
     print(len(label_list))
 
     # === model ===
-    model_name_or_path = "/data/sunwh/pretrained_models/models/FacebookAI/roberta-large"
+    model_name_or_path = "/data/sunwh/pretrained_models/roberta-base"
     # model_name_or_path = '/data/sunwh/model/flan-t5-base'
     model = AutoModelForSequenceClassification.from_pretrained(model_name_or_path, num_labels=len(label_list))
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
@@ -243,9 +244,9 @@ def main():
         report_to='tensorboard',
         
         # strategies of evaluation, logging, save
-        eval_strategy = "epoch", 
+        # eval_strategy = "epoch", 
         # eval_steps = 500,
-        # save_steps = 500,
+        save_steps = 0.5,
         logging_strategy = 'steps',
         logging_steps = 10,
         save_strategy = 'epoch',
@@ -275,7 +276,7 @@ def main():
     # 加载训练集、验证集和测试集
     train_dataset = CustomDataset(dfs.train_df, label_list, tokenizer)
     dev_dataset = CustomDataset(dfs.dev_df, label_list, tokenizer)
-    test_dataset = CustomDataset(dfs.test_df, label_list, tokenizer)
+    # test_dataset = CustomDataset(dfs.test_df, label_list, tokenizer)
     # print(test_dataset[0])
     # exit()
 
@@ -301,6 +302,7 @@ def main():
 
     # 开始训练和评估
     train_result = trainer.train()
+    print(f'\n> train_result:\n  {train_result}')
     
     # 训练结束后，保存最终验证集评估结果
     print('\n> 保存验证集评估结果...')
@@ -313,19 +315,16 @@ def main():
     )
     
     # 评估测试集并保存结果
-    print('\n> 评估测试集并保存结果...')
-    test_result = trainer.evaluate(eval_dataset=test_dataset)
-    save_evaluation_results(
-        trainer=trainer,
-        dataset=test_dataset,
-        label_list=label_list,
-        output_filepath=eval_results_dir / 'test_final_results.csv',
-        dataset_name='test',
-    )
-    
-    print(f'\n> train_result:\n  {train_result}')
-    print(f'\n> test_result:\n  {test_result}')
-
+    # print('\n> 评估测试集并保存结果...')
+    # test_result = trainer.evaluate(eval_dataset=dev_dataset)
+    # print(f'\n> test_result:\n  {test_result}')
+    # save_evaluation_results(
+    #     trainer=trainer,
+    #     dataset=test_dataset,
+    #     label_list=label_list,
+    #     output_filepath=eval_results_dir / 'test_final_results.csv',
+    #     dataset_name='test',
+    # )
     pass
 
 if __name__ == '__main__':
